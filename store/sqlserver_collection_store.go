@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/microsoft/go-mssqldb"
@@ -17,7 +18,7 @@ type SqlServerCollectionStore struct {
 	dbx         *sqlx.DB
 }
 
-func NewSqlServerGrlsStore(databaseUrl string) *SqlServerCollectionStore {
+func NewSqlServerCollectionStore(databaseUrl string) *SqlServerCollectionStore {
 	return &SqlServerCollectionStore{
 		databaseUrl: databaseUrl,
 	}
@@ -43,19 +44,20 @@ func (s *SqlServerCollectionStore) close() error {
 	return s.dbx.Close()
 }
 
-func (s *SqlServerCollectionStore) GetModelList(ctx context.Context, term string) ([]Model, error) {
+func (s *SqlServerCollectionStore) GetOSMapList(ctx context.Context, mapRange string) ([]OSMap, error) {
 	err := s.connect(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer s.close()
 
-	var models []Model
-	jsonBody := fmt.Sprintf(`{"search_term": "%v"}`, term)
+	var maps []OSMap
+	sqlCmd := `EXEC COLLECTION.r_OS_` + strings.ToUpper(mapRange) + ` @p_input_json = @json`
+	jsonBody := `{"item_id": -1}`
 
 	r, err := s.dbx.QueryxContext(
-		ctx, `
-		EXEC GRLS.r_model_card_list @p_input_json = @json`,
+		ctx,
+		sqlCmd,
 		sql.Named("json", jsonBody))
 
 	if err != nil {
@@ -64,141 +66,44 @@ func (s *SqlServerCollectionStore) GetModelList(ctx context.Context, term string
 	defer r.Close()
 
 	for r.Next() {
-		var m Model
+		var m OSMap
 		if err := r.StructScan(&m); err != nil {
 			log.Printf("failed: %v", err)
 			return nil, err
 		}
-		models = append(models, m)
+		maps = append(maps, m)
 	}
 
-	return models, nil
+	return maps, nil
 }
 
-func (s *SqlServerGrlsStore) GetModel(ctx context.Context, id int) (ModelExtended, error) {
+func (s *SqlServerCollectionStore) GetOSMapItem(ctx context.Context, mapRange string, item_id int) (OSMap, error) {
 	err := s.connect(ctx)
 	if err != nil {
-		return ModelExtended{}, err
+		return OSMap{}, err
 	}
 	defer s.close()
 
-	var model ModelExtended
-	jsonBody := fmt.Sprintf(`{"model_id": %d}`, id)
+	var m OSMap
+	sqlCmd := `EXEC COLLECTION.r_OS_` + strings.ToUpper(mapRange) + ` @p_input_json = @json`
+	jsonBody := fmt.Sprintf(`{"item_id": %d}`, item_id)
 
 	r, err := s.dbx.QueryxContext(
-		ctx, `
-		EXEC GRLS.r_model @p_input_json = @json`,
+		ctx,
+		sqlCmd,
 		sql.Named("json", jsonBody))
 
 	if err != nil {
-		return ModelExtended{}, err
-	}
-	defer r.Close()
-
-	if r.Next() {
-		if err := r.StructScan(&model); err != nil {
-			log.Printf("err1: %v", err)
-
-			return ModelExtended{}, err
-		}
-	} else {
-		//return ModelExtended{}, sql.ErrNoRows
-		return ModelExtended{}, &RecordNotFoundError{id}
-	}
-	return model, nil
-}
-
-func (s *SqlServerGrlsStore) GetMovieList(ctx context.Context) ([]Movie, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
-
-	var movies []Movie
-	var jsonBody = `{"model_id": -1, "search_term": "%", "minimum_rating": 1}`
-
-	r, err := s.dbx.QueryxContext(
-		ctx, `
-		EXEC GRLS.r_movie_list @p_input_json = @json`,
-		sql.Named("json", jsonBody))
-
-	if err != nil {
-		return nil, err
+		return OSMap{}, err
 	}
 	defer r.Close()
 
 	for r.Next() {
-		var m Movie
 		if err := r.StructScan(&m); err != nil {
 			log.Printf("failed: %v", err)
-			return nil, err
+			return OSMap{}, err
 		}
-		movies = append(movies, m)
 	}
 
-	return movies, nil
-}
-
-func (s *SqlServerGrlsStore) GetAttrDescList(ctx context.Context, attr_abbrev string) ([]AttrDesc, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
-
-	var desc []AttrDesc
-	var jsonBody = `{"abbrev": "` + attr_abbrev + `"}`
-
-	r, err := s.dbx.QueryxContext(
-		ctx, `
-		EXEC GRLS.r_l2_attribute_list @p_input_json = @json`,
-		sql.Named("json", jsonBody))
-
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-
-	for r.Next() {
-		var m AttrDesc
-		if err := r.StructScan(&m); err != nil {
-			log.Printf("failed: %v", err)
-			return nil, err
-		}
-		desc = append(desc, m)
-	}
-
-	return desc, nil
-}
-
-func (s *SqlServerGrlsStore) GetFlagList(ctx context.Context, flag_type string) ([]Flag, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
-
-	var flags []Flag
-	var jsonBody = `{"flag_type": "` + flag_type + `"}`
-
-	r, err := s.dbx.QueryxContext(
-		ctx, `
-		EXEC GRLS.r_flag_list @p_input_json = @json`,
-		sql.Named("json", jsonBody))
-
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-
-	for r.Next() {
-		var m Flag
-		if err := r.StructScan(&m); err != nil {
-			log.Printf("failed: %v", err)
-			return nil, err
-		}
-		flags = append(flags, m)
-	}
-	return flags, nil
+	return m, nil
 }

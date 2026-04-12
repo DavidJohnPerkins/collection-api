@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
-	"dperkins/grls-api/config"
-	"dperkins/grls-api/store"
+	"dperkins/collection-api/config"
+	"dperkins/collection-api/store"
 	"fmt"
 	"log"
 	"net/http"

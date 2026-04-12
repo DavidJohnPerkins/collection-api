@@ -5,24 +5,25 @@ import (
 )
 
 type OSMap struct {
-	Id               int    `db:"id"`
-	Is_excluded      bool   `db:"is_excluded"`
-	Sobriquet        string `db:"sobriquet"`
-	Principal_name   string `db:"principal_name"`
-	Hotness_quotient int    `db:"hotness_quotient"`
-	Nationality      string `db:"nationality"`
-	Ranking          string `db:"ranking"`
-	Flags            string `db:"flags"`
-	TH_url           string `db:"TH_url"`
-	Movie_count      int    `db:"movie_count"`
+	Item_id          string `db:"item_id"`
+	Map_number       string `db:"map_number"`
+	Map_title        string `db:"map_title"`
+	Publish_date     string `db:"publish_date"`
+	Main_settlements string `db:"main_settlements"`
+	Key_value        string `db:"key_value"`
+	Map_image        string `db:"map_image"`
+	Map_image_rear   string `db:"map_image_rear"`
+	Map_image_area   string `db:"map_image_area"`
+	Comments         string `db:"comments"`
 }
 
 type Interface interface {
-	GetModelList(ctx context.Context, term string) ([]Model, error)
-	GetModel(ctx context.Context, id int) (ModelExtended, error)
-	GetMovieList(ctx context.Context) ([]Movie, error)
-	GetAttrDescList(ctx context.Context, attr_abbrev string) ([]AttrDesc, error)
-	GetFlagList(ctx context.Context, flag_type string) ([]Flag, error)
+	GetOSMapList(ctx context.Context, mapRange string) ([]OSMap, error)
+	GetOSMapItem(ctx context.Context, mapRange string, item_id int) (OSMap, error)
+	//GetModel(ctx context.Context, id int) (ModelExtended, error)
+	//GetMovieList(ctx context.Context) ([]Movie, error)
+	//GetAttrDescList(ctx context.Context, attr_abbrev string) ([]AttrDesc, error)
+	//GetFlagList(ctx context.Context, flag_type string) ([]Flag, error)
 }
 
 // type Interface interface {

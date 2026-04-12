@@ -10,5 +10,11 @@ func (s *Server) routes() {
 
 	s.router.Route("/api/collection", func(r chi.Router) {
 		r.Get("/", s.handleOSMapList)
+		r.Route("/maps/{range}", func(r chi.Router) {
+			r.Get("/", s.handleOSMapList)
+		})
+		r.Route("/maps/{range}/{item_id}", func(r chi.Router) {
+			r.Get("/", s.handleOSMapItem)
+		})
 	})
 }
