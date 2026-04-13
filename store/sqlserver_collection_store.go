@@ -140,3 +140,98 @@ func (s *SqlServerCollectionStore) GetInkList(ctx context.Context) ([]Ink, error
 
 	return inks, nil
 }
+
+func (s *SqlServerCollectionStore) GetInkItem(ctx context.Context, item_id int) (Ink, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return Ink{}, err
+	}
+	defer s.close()
+
+	var ink Ink
+	sqlCmd := `EXEC COLLECTION.r_INK_COLLECTION @p_input_json = @json`
+	jsonBody := fmt.Sprintf(`{"item_id": %d}`, item_id)
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return Ink{}, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		if err := r.StructScan(&ink); err != nil {
+			log.Printf("failed: %v", err)
+			return Ink{}, err
+		}
+	}
+
+	return ink, nil
+}
+
+func (s *SqlServerCollectionStore) GetPenList(ctx context.Context) ([]Pen, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer s.close()
+
+	var pens []Pen
+	sqlCmd := `EXEC COLLECTION.r_PEN_COLLECTION @p_input_json = @json`
+	jsonBody := `{"item_id": -1}`
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var p Pen
+		if err := r.StructScan(&p); err != nil {
+			log.Printf("failed: %v", err)
+			return nil, err
+		}
+		pens = append(pens, p)
+	}
+
+	return pens, nil
+}
+
+func (s *SqlServerCollectionStore) GetPenItem(ctx context.Context, item_id int) (Pen, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return Pen{}, err
+	}
+	defer s.close()
+
+	var pen Pen
+	sqlCmd := `EXEC COLLECTION.r_PEN_COLLECTION @p_input_json = @json`
+	jsonBody := fmt.Sprintf(`{"item_id": %d}`, item_id)
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return Pen{}, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		if err := r.StructScan(&pen); err != nil {
+			log.Printf("failed: %v", err)
+			return Pen{}, err
+		}
+	}
+
+	return pen, nil
+}

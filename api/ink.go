@@ -42,17 +42,17 @@ func NewInkResponse(m store.Ink) inkResponse {
 	}
 }
 
-func (mr inkResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (ir inkResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func NewInkListResponse(maps []store.Ink) []render.Renderer {
+func NewInkListResponse(inks []store.Ink) []render.Renderer {
 
 	list := []render.Renderer{}
 
-	for _, m := range maps {
-		mr := NewInkResponse(m)
-		list = append(list, mr)
+	for _, i := range inks {
+		ir := NewInkResponse(i)
+		list = append(list, ir)
 	}
 	return list
 }
@@ -71,19 +71,15 @@ func (s *Server) handleInkList(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleInkItem(w http.ResponseWriter, r *http.Request) {
 
-	rangeParam := chi.URLParam(r, "range")
-	if rangeParam == "" {
-		rangeParam = "LANDRANGER"
-	}
 	idParam := chi.URLParam(r, "item_id")
 	id, _ := strconv.Atoi(idParam)
 
-	m, err := s.store.GetOSMapItem(r.Context(), rangeParam, id)
+	m, err := s.store.GetInkItem(r.Context(), id)
 	if err != nil {
 		log.Printf("err: %v", err)
 		render.Render(w, r, ErrInternalServerError)
 		return
 	}
 
-	render.Render(w, r, NewOSMapResponse(m))
+	render.Render(w, r, NewInkResponse(m))
 }
