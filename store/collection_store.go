@@ -5,7 +5,7 @@ import (
 )
 
 type OSMap struct {
-	Item_id          string `db:"item_id"`
+	Item_id          int    `db:"item_id"`
 	Map_number       string `db:"map_number"`
 	Map_title        string `db:"map_title"`
 	Publish_date     string `db:"publish_date"`
@@ -17,9 +17,25 @@ type OSMap struct {
 	Comments         string `db:"comments"`
 }
 
+type Ink struct {
+	Item_id        int    `db:"item_id"`
+	Brand          string `db:"BRAND"`
+	Range          string `db:"RANGE"`
+	Container      string `db:"CONTAINER"`
+	Container_size string `db:"CONTAINER_SIZE"`
+	Colour         string `db:"COLOUR"`
+	Qty_remaining  int    `db:"QTY_REMAINING"`
+	Rating         int    `db:"RATING"`
+	Ink_name       string `db:"INK_NAME"`
+	Key_Value      string `db:"key_value"`
+	Image_1        string `db:"IMAGE_1"`
+	Comments       string `db:"COMMENTS"`
+}
+
 type Interface interface {
 	GetOSMapList(ctx context.Context, mapRange string) ([]OSMap, error)
 	GetOSMapItem(ctx context.Context, mapRange string, item_id int) (OSMap, error)
+	GetInkList(ctx context.Context) ([]Ink, error)
 	//GetModel(ctx context.Context, id int) (ModelExtended, error)
 	//GetMovieList(ctx context.Context) ([]Movie, error)
 	//GetAttrDescList(ctx context.Context, attr_abbrev string) ([]AttrDesc, error)

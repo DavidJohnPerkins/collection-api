@@ -11,7 +11,7 @@ import (
 )
 
 type osMapResponse struct {
-	Item_id          string `json:"item_id"`
+	Item_id          int    `json:"item_id"`
 	Map_number       string `json:"map_number"`
 	Map_title        string `json:"map_title"`
 	Publish_date     string `json:"publish_date"`

@@ -16,5 +16,6 @@ func (s *Server) routes() {
 		r.Route("/maps/{range}/{item_id}", func(r chi.Router) {
 			r.Get("/", s.handleOSMapItem)
 		})
+		r.Get("/inks", s.handleInkList)
 	})
 }

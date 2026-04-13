@@ -107,3 +107,36 @@ func (s *SqlServerCollectionStore) GetOSMapItem(ctx context.Context, mapRange st
 
 	return m, nil
 }
+
+func (s *SqlServerCollectionStore) GetInkList(ctx context.Context) ([]Ink, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer s.close()
+
+	var inks []Ink
+	sqlCmd := `EXEC COLLECTION.r_INK_COLLECTION @p_input_json = @json`
+	jsonBody := `{"item_id": -1}`
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var i Ink
+		if err := r.StructScan(&i); err != nil {
+			log.Printf("failed: %v", err)
+			return nil, err
+		}
+		inks = append(inks, i)
+	}
+
+	return inks, nil
+}
