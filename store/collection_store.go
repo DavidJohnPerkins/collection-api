@@ -62,16 +62,4 @@ type Interface interface {
 	GetInkItem(ctx context.Context, item_id int) (Ink, error)
 	GetPenList(ctx context.Context) ([]Pen, error)
 	GetPenItem(ctx context.Context, item_id int) (Pen, error)
-	//GetModel(ctx context.Context, id int) (ModelExtended, error)
-	//GetMovieList(ctx context.Context) ([]Movie, error)
-	//GetAttrDescList(ctx context.Context, attr_abbrev string) ([]AttrDesc, error)
-	//GetFlagList(ctx context.Context, flag_type string) ([]Flag, error)
 }
-
-// type Interface interface {
-// 	GetModelList(ctx context.Context) ([]Model, error)
-// 	GetByID(ctx context.Context, id uuid.UUID) (Movie, error)
-// 	Create(ctx context.Context, jsonString string) error
-// 	Update(ctx context.Context, jsonString string) error
-// 	Delete(ctx context.Context, jsonString string) error
-// }
