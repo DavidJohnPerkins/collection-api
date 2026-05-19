@@ -235,3 +235,67 @@ func (s *SqlServerCollectionStore) GetPenItem(ctx context.Context, item_id int) 
 
 	return pen, nil
 }
+
+func (s *SqlServerCollectionStore) GetScoreList(ctx context.Context) ([]Score, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer s.close()
+
+	var scores []Score
+	sqlCmd := `EXEC COLLECTION.r_SCORES @p_input_json = @json`
+	jsonBody := `{"item_id": -1}`
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var s Score
+		if err := r.StructScan(&s); err != nil {
+			log.Printf("failed: %v", err)
+			return nil, err
+		}
+		scores = append(scores, s)
+	}
+
+	return scores, nil
+}
+
+func (s *SqlServerCollectionStore) GetScoreItem(ctx context.Context, item_id int) (Score, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return Score{}, err
+	}
+	defer s.close()
+
+	var score Score
+	sqlCmd := `EXEC COLLECTION.r_SCORES @p_input_json = @json`
+	jsonBody := fmt.Sprintf(`{"item_id": %d}`, item_id)
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return Score{}, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		if err := r.StructScan(&score); err != nil {
+			log.Printf("failed: %v", err)
+			return Score{}, err
+		}
+	}
+
+	return score, nil
+}

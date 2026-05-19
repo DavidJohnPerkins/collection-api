@@ -31,6 +31,7 @@ type Ink struct {
 	Image_1        string `db:"IMAGE_1"`
 	Comments       string `db:"comments"`
 }
+
 type Pen struct {
 	Item_id           int     `db:"item_id"`
 	Brand             string  `db:"BRAND"`
@@ -55,6 +56,18 @@ type Pen struct {
 	Comments          string  `db:"comments"`
 }
 
+type Score struct {
+	Item_id     int    `db:"item_id"`
+	Key_Value   string `db:"key_value"`
+	Publisher   string `db:"PUBLISHER"`
+	Composer    string `db:"COMPOSER"`
+	Work_name   string `db:"WORK_NAME"`
+	Work_type   string `db:"WORK_TYPE"`
+	Score_size  string `db:"SCORE_SIZE"`
+	Score_pages int    `db:"SCORE_PAGES"`
+	Comments    string `db:"comments"`
+}
+
 type Interface interface {
 	GetOSMapList(ctx context.Context, mapRange string) ([]OSMap, error)
 	GetOSMapItem(ctx context.Context, mapRange string, item_id int) (OSMap, error)
@@ -62,4 +75,6 @@ type Interface interface {
 	GetInkItem(ctx context.Context, item_id int) (Ink, error)
 	GetPenList(ctx context.Context) ([]Pen, error)
 	GetPenItem(ctx context.Context, item_id int) (Pen, error)
+	GetScoreList(ctx context.Context) ([]Score, error)
+	GetScoreItem(ctx context.Context, item_id int) (Score, error)
 }

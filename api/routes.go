@@ -24,5 +24,9 @@ func (s *Server) routes() {
 		r.Route("/pens/{item_id}", func(r chi.Router) {
 			r.Get("/", s.handlePenItem)
 		})
+		r.Get("/scores", s.handleScoreList)
+		r.Route("/scores/{item_id}", func(r chi.Router) {
+			r.Get("/", s.handleScoreItem)
+		})
 	})
 }
