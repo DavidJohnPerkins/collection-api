@@ -28,5 +28,9 @@ func (s *Server) routes() {
 		r.Route("/scores/{item_id}", func(r chi.Router) {
 			r.Get("/", s.handleScoreItem)
 		})
+		r.Get("/polychrom", s.handlePolychromList)
+		r.Route("/polychrom/{item_id}", func(r chi.Router) {
+			r.Get("/", s.handlePolychromItem)
+		})
 	})
 }

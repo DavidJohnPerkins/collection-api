@@ -56,6 +56,22 @@ type Pen struct {
 	Comments          string  `db:"comments"`
 }
 
+type Polychrom struct {
+	Item_id       int    `db:"item_id"`
+	Key_Value     string `db:"key_value"`
+	Colour_number string `db:"COLOUR_NUMBER"`
+	Colour_name   string `db:"COLOUR_NAME"`
+	Length        int    `db:"LENGTH"`
+	Colour_group  string `db:"COLOUR_GROUP"`
+	Location      string `db:"LOCATION"`
+	RGB_red       int    `db:"RGB_RED"`
+	RGB_green     int    `db:"RGB_GREEN"`
+	RGB_blue      int    `db:"RGB_BLUE"`
+	Web_name      string `db:"web_name"`
+	Image_1       string `db:"IMAGE_1"`
+	Comments      string `db:"comments"`
+}
+
 type Score struct {
 	Item_id     int    `db:"item_id"`
 	Key_Value   string `db:"key_value"`
@@ -77,4 +93,6 @@ type Interface interface {
 	GetPenItem(ctx context.Context, item_id int) (Pen, error)
 	GetScoreList(ctx context.Context) ([]Score, error)
 	GetScoreItem(ctx context.Context, item_id int) (Score, error)
+	GetPolychromList(ctx context.Context) ([]Polychrom, error)
+	GetPolychromItem(ctx context.Context, item_id int) (Polychrom, error)
 }

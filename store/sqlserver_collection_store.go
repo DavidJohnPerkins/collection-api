@@ -299,3 +299,67 @@ func (s *SqlServerCollectionStore) GetScoreItem(ctx context.Context, item_id int
 
 	return score, nil
 }
+
+func (s *SqlServerCollectionStore) GetPolychromList(ctx context.Context) ([]Polychrom, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer s.close()
+
+	var pencils []Polychrom
+	sqlCmd := `EXEC COLLECTION.r_POLYCHROMOS_PENCILS @p_input_json = @json`
+	jsonBody := `{"item_id": -1}`
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var p Polychrom
+		if err := r.StructScan(&p); err != nil {
+			log.Printf("failed: %v", err)
+			return nil, err
+		}
+		pencils = append(pencils, p)
+	}
+
+	return pencils, nil
+}
+
+func (s *SqlServerCollectionStore) GetPolychromItem(ctx context.Context, item_id int) (Polychrom, error) {
+	err := s.connect(ctx)
+	if err != nil {
+		return Polychrom{}, err
+	}
+	defer s.close()
+
+	var pencil Polychrom
+	sqlCmd := `EXEC COLLECTION.r_POLYCHROMOS_PENCILS @p_input_json = @json`
+	jsonBody := fmt.Sprintf(`{"item_id": %d}`, item_id)
+
+	r, err := s.dbx.QueryxContext(
+		ctx,
+		sqlCmd,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return Polychrom{}, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		if err := r.StructScan(&pencil); err != nil {
+			log.Printf("failed: %v", err)
+			return Polychrom{}, err
+		}
+	}
+
+	return pencil, nil
+}
