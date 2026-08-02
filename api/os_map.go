@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	chi "github.com/go-chi/chi/v5"
+	//chi "github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
@@ -55,10 +55,7 @@ func NewOSMapListResponse(maps []store.OSMap) []render.Renderer {
 
 func (s *Server) handleOSMapList(w http.ResponseWriter, r *http.Request) {
 
-	rangeParam := chi.URLParam(r, "range")
-	if rangeParam == "" {
-		rangeParam = "LANDRANGER"
-	}
+	rangeParam := r.URL.Query().Get("range")
 	maps, err := s.store.GetOSMapList(r.Context(), rangeParam)
 	if err != nil {
 		log.Printf("err: %v", err)
@@ -71,11 +68,8 @@ func (s *Server) handleOSMapList(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleOSMapItem(w http.ResponseWriter, r *http.Request) {
 
-	rangeParam := chi.URLParam(r, "range")
-	if rangeParam == "" {
-		rangeParam = "LANDRANGER"
-	}
-	idParam := chi.URLParam(r, "item_id")
+	rangeParam := r.URL.Query().Get("range")
+	idParam := r.URL.Query().Get("item_id")
 	id, _ := strconv.Atoi(idParam)
 
 	m, err := s.store.GetOSMapItem(r.Context(), rangeParam, id)

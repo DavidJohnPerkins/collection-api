@@ -9,28 +9,19 @@ func (s *Server) routes() {
 	s.router.Use(render.SetContentType(render.ContentTypeJSON))
 
 	s.router.Route("/api/collection", func(r chi.Router) {
-		r.Get("/", s.handleOSMapList)
-		r.Route("/maps/{range}", func(r chi.Router) {
-			r.Get("/", s.handleOSMapList)
-		})
-		r.Route("/maps/{range}/{item_id}", func(r chi.Router) {
-			r.Get("/", s.handleOSMapItem)
-		})
-		r.Get("/inks", s.handleInkList)
-		r.Route("/inks/{item_id}", func(r chi.Router) {
-			r.Get("/", s.handleInkItem)
-		})
-		r.Get("/pens", s.handlePenList)
-		r.Route("/pens/{item_id}", func(r chi.Router) {
-			r.Get("/", s.handlePenItem)
-		})
-		r.Get("/scores", s.handleScoreList)
-		r.Route("/scores/{item_id}", func(r chi.Router) {
-			r.Get("/", s.handleScoreItem)
-		})
-		r.Get("/polychrom", s.handlePolychromList)
-		r.Route("/polychrom/{item_id}", func(r chi.Router) {
-			r.Get("/", s.handlePolychromItem)
-		})
+		r.Get("/maplist", s.handleOSMapList)
+		r.Get("/map/get", s.handleOSMapItem)
+
+		r.Get("/inklist", s.handleInkList)
+		r.Get("/ink/get", s.handleInkItem)
+
+		r.Get("/penlist", s.handlePenList)
+		r.Get("/pen/get", s.handlePenItem)
+
+		r.Get("/scorelist", s.handleScoreList)
+		r.Get("/score/get", s.handleScoreItem)
+
+		r.Get("/polychromlist", s.handlePolychromList)
+		r.Get("/polychrom/get", s.handlePolychromItem)
 	})
 }

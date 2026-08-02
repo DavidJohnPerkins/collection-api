@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	chi "github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
@@ -65,7 +64,7 @@ func (s *Server) handleScoreList(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleScoreItem(w http.ResponseWriter, r *http.Request) {
 
-	idParam := chi.URLParam(r, "item_id")
+	idParam := r.URL.Query().Get("item_id")
 	id, _ := strconv.Atoi(idParam)
 	log.Printf("id: %v", id)
 	sc, err := s.store.GetScoreItem(r.Context(), id)
