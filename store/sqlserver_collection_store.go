@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/microsoft/go-mssqldb"
@@ -14,30 +15,32 @@ import (
 const driverName = "sqlserver"
 
 type SqlServerCollectionStore struct {
-	databaseUrl string
-	dbx         *sqlx.DB
+	dbx *sqlx.DB
 }
 
-func NewSqlServerCollectionStore(databaseUrl string) *SqlServerCollectionStore {
-	return &SqlServerCollectionStore{
-		databaseUrl: databaseUrl,
-	}
+func NewSqlServerCollectionStore(dbx *sqlx.DB) *SqlServerCollectionStore {
+	return &SqlServerCollectionStore{dbx: dbx}
 }
 
 func noOpMapper(s string) string {
 	return s
 }
 
-func (s *SqlServerCollectionStore) connect(ctx context.Context) error {
-	dbx, err := sqlx.ConnectContext(ctx, driverName, s.databaseUrl)
+func InitSharedDB(ctx context.Context, databaseURL string) (*sqlx.DB, error) {
+	dbx, err := sqlx.ConnectContext(ctx, driverName, databaseURL)
 	if err != nil {
-		log.Printf("DB connect failed: %v", err)
-		return err
+		return nil, fmt.Errorf("connect failed: %w", err)
 	}
 
 	dbx.MapperFunc(noOpMapper)
-	s.dbx = dbx
-	return nil
+
+	// Connection pool settings
+	dbx.SetMaxOpenConns(25)
+	dbx.SetMaxIdleConns(10)
+	dbx.SetConnMaxLifetime(5 * time.Minute)
+	dbx.SetConnMaxIdleTime(1 * time.Minute)
+
+	return dbx, nil
 }
 
 func (s *SqlServerCollectionStore) close() error {
@@ -45,11 +48,6 @@ func (s *SqlServerCollectionStore) close() error {
 }
 
 func (s *SqlServerCollectionStore) GetOSMapList(ctx context.Context, mapRange string) ([]OSMap, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
 
 	var maps []OSMap
 	sqlCmd := `EXEC COLLECTION.r_OS_` + strings.ToUpper(mapRange) + ` @p_input_json = @json`
@@ -78,11 +76,6 @@ func (s *SqlServerCollectionStore) GetOSMapList(ctx context.Context, mapRange st
 }
 
 func (s *SqlServerCollectionStore) GetOSMapItem(ctx context.Context, mapRange string, item_id int) (OSMap, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return OSMap{}, err
-	}
-	defer s.close()
 
 	var m OSMap
 	sqlCmd := `EXEC COLLECTION.r_OS_` + strings.ToUpper(mapRange) + ` @p_input_json = @json`
@@ -109,11 +102,6 @@ func (s *SqlServerCollectionStore) GetOSMapItem(ctx context.Context, mapRange st
 }
 
 func (s *SqlServerCollectionStore) GetInkList(ctx context.Context) ([]Ink, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
 
 	var inks []Ink
 	sqlCmd := `EXEC COLLECTION.r_INK_COLLECTION @p_input_json = @json`
@@ -142,11 +130,6 @@ func (s *SqlServerCollectionStore) GetInkList(ctx context.Context) ([]Ink, error
 }
 
 func (s *SqlServerCollectionStore) GetInkItem(ctx context.Context, item_id int) (Ink, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return Ink{}, err
-	}
-	defer s.close()
 
 	var ink Ink
 	sqlCmd := `EXEC COLLECTION.r_INK_COLLECTION @p_input_json = @json`
@@ -173,11 +156,6 @@ func (s *SqlServerCollectionStore) GetInkItem(ctx context.Context, item_id int) 
 }
 
 func (s *SqlServerCollectionStore) GetPenList(ctx context.Context) ([]Pen, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
 
 	var pens []Pen
 	sqlCmd := `EXEC COLLECTION.r_PEN_COLLECTION @p_input_json = @json`
@@ -206,11 +184,6 @@ func (s *SqlServerCollectionStore) GetPenList(ctx context.Context) ([]Pen, error
 }
 
 func (s *SqlServerCollectionStore) GetPenItem(ctx context.Context, item_id int) (Pen, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return Pen{}, err
-	}
-	defer s.close()
 
 	var pen Pen
 	sqlCmd := `EXEC COLLECTION.r_PEN_COLLECTION @p_input_json = @json`
@@ -237,11 +210,6 @@ func (s *SqlServerCollectionStore) GetPenItem(ctx context.Context, item_id int) 
 }
 
 func (s *SqlServerCollectionStore) GetScoreList(ctx context.Context) ([]Score, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
 
 	var scores []Score
 	sqlCmd := `EXEC COLLECTION.r_SCORES @p_input_json = @json`
@@ -270,11 +238,6 @@ func (s *SqlServerCollectionStore) GetScoreList(ctx context.Context) ([]Score, e
 }
 
 func (s *SqlServerCollectionStore) GetScoreItem(ctx context.Context, item_id int) (Score, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return Score{}, err
-	}
-	defer s.close()
 
 	var score Score
 	sqlCmd := `EXEC COLLECTION.r_SCORES @p_input_json = @json`
@@ -301,11 +264,6 @@ func (s *SqlServerCollectionStore) GetScoreItem(ctx context.Context, item_id int
 }
 
 func (s *SqlServerCollectionStore) GetPolychromList(ctx context.Context) ([]Polychrom, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer s.close()
 
 	var pencils []Polychrom
 	sqlCmd := `EXEC COLLECTION.r_POLYCHROMOS_PENCILS @p_input_json = @json`
@@ -334,11 +292,6 @@ func (s *SqlServerCollectionStore) GetPolychromList(ctx context.Context) ([]Poly
 }
 
 func (s *SqlServerCollectionStore) GetPolychromItem(ctx context.Context, item_id int) (Polychrom, error) {
-	err := s.connect(ctx)
-	if err != nil {
-		return Polychrom{}, err
-	}
-	defer s.close()
 
 	var pencil Polychrom
 	sqlCmd := `EXEC COLLECTION.r_POLYCHROMOS_PENCILS @p_input_json = @json`

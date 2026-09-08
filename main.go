@@ -16,7 +16,13 @@ func main() {
 		log.Fatal(err)
 		os.Exit(1)
 	}
-	store := store.NewSqlServerCollectionStore(cfg.DatabaseURL)
-	server := api.NewServer(cfg.HTTPServer, store)
+
+	dbx, err := store.InitSharedDB(ctx, cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("failed to init db: %v", err)
+	}
+
+	collectionStore := store.NewSqlServerCollectionStore(dbx)
+	server := api.NewServer(cfg.HTTPServer, collectionStore)
 	server.Start(ctx)
 }
