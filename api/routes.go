@@ -23,5 +23,9 @@ func (s *Server) routes() {
 
 		r.Get("/polychromlist", s.handlePolychromList)
 		r.Get("/polychrom/get", s.handlePolychromItem)
+
+		// /api/collection/filterlist
+		r.Get("/filterlist/get", s.handleFilterList)
+
 	})
 }

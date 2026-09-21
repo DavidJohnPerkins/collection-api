@@ -84,6 +84,10 @@ type Score struct {
 	Comments    string `db:"comments"`
 }
 
+type FilterValue struct {
+	Filter_value string `db:"attr_value"`
+}
+
 type Interface interface {
 	GetOSMapList(ctx context.Context, mapRange string) ([]OSMap, error)
 	GetOSMapItem(ctx context.Context, mapRange string, item_id int) (OSMap, error)
@@ -95,4 +99,5 @@ type Interface interface {
 	GetScoreItem(ctx context.Context, item_id int) (Score, error)
 	GetPolychromList(ctx context.Context) ([]Polychrom, error)
 	GetPolychromItem(ctx context.Context, item_id int) (Polychrom, error)
+	GetFilterList(ctx context.Context, collection_name string, dim_col string) ([]FilterValue, error)
 }

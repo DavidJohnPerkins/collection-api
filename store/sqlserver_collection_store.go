@@ -316,3 +316,30 @@ func (s *SqlServerCollectionStore) GetPolychromItem(ctx context.Context, item_id
 
 	return pencil, nil
 }
+
+func (s *SqlServerCollectionStore) GetFilterList(ctx context.Context, collection string, dim_col string) ([]FilterValue, error) {
+
+	var fv []FilterValue
+	var jsonBody = `{"collection_name": "` + collection + `", "dimension_col": "` + dim_col + `"}`
+
+	r, err := s.dbx.QueryxContext(
+		ctx, `
+		EXEC COLLECTION.r_collection_filter_values @p_input_json = @json`,
+		sql.Named("json", jsonBody))
+
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var m FilterValue
+		if err := r.StructScan(&m); err != nil {
+			log.Printf("failed: %v", err)
+			return nil, err
+		}
+		fv = append(fv, m)
+	}
+
+	return fv, nil
+}
